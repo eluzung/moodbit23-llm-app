@@ -14,7 +14,7 @@ function UserInput() {
             
             const response = await axios.post(`https://a92d-108-46-33-124.ngrok-free.app/api/response`, inputObj);
     
-            console.log("This is the response data:", response);
+            console.log("This is the response data:", response.data);
             } catch (error) {
                 console.error(error);
             }
