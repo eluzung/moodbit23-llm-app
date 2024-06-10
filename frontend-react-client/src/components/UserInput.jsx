@@ -7,9 +7,12 @@ function UserInput() {
 
     const fetchResponse = async () => {
         try {
-            const response = await axios.post(
-                `https://1c59-108-46-33-124.ngrok-free.app/api/response`, input,
-            )
+            let inputObj = {
+                strInput: input
+            };
+            console.log(inputObj);
+            
+            const response = await axios.post(`https://a92d-108-46-33-124.ngrok-free.app/api/response`, inputObj);
     
             console.log("This is the response data:", response);
             } catch (error) {
@@ -19,11 +22,11 @@ function UserInput() {
 
     function handleChange(event) {
         event.preventDefault();
-        console.log(event.target.value)
         setInput(event.target.value);
     };
 
     async function handleSubmit(event) {
+        event.preventDefault()
         fetchResponse();
     };
 
