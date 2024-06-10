@@ -4,7 +4,7 @@ import traceback
 import os
 from dotenv import load_dotenv, find_dotenv
 from openai import OpenAI
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
@@ -74,11 +74,11 @@ def get_history():
     try:
         return memory.load_memory_variables({})
     except Exception:
-        return Response('Error has occured', 500)
+        return 'Error has occured'
 
 @openai_bp.route('/chathistory', methods = ["DELETE"])
 def delete_history():
     try:
         return memory.clear()
     except Exception:
-        return Response('Error has occured', 500)
+        return 'Error has occured'
