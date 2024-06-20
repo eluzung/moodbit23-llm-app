@@ -1,11 +1,19 @@
-from flask import Blueprint, Response, request
+from flask import Blueprint, Response, request, jsonify
 import os
 from dotenv import load_dotenv, find_dotenv
-import wikipedia
 from langchain.agents import tool, load_tools, initialize_agent, AgentType
 from langchain_community.chat_models import ChatOpenAI
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
+from langchain.prompts import ChatPromptTemplate
+from langchain_community.document_loaders import WikipediaLoader
+from langchain_community.retrievers import WikipediaRetriever
+
+from typing import List
+
+from langchain_core.documents import Document
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 wiki_bp = Blueprint('wikipedia', __name__)
 
@@ -15,38 +23,23 @@ llm_model = "gpt-3.5-turbo"
 chat_llm = ChatOpenAI(temperature=0.0, 
                       model=llm_model, 
                       api_key=os.environ.get('OPEN_API_KEY'))
+
 memory = ConversationSummaryBufferMemory(llm=chat_llm, max_token_limit=100)
+
 convo_with_summary = ConversationChain(llm=chat_llm,memory=memory)
 
-
-# @tool
-# def search_wikipedia(query: str) -> str:
-#     """Run Wikipedia search and get page summaries."""
-#     page_titles = wikipedia.search(query)
-#     summaries = []
-#     for page_title in page_titles[: 3]:
-#         try:
-#             wiki_page =  wikipedia.page(title=page_title, auto_suggest=False)
-#             summaries.append(f"Page: {page_title}\nSummary: {wiki_page.summary}")
-#         except (
-#             self.wiki_client.exceptions.PageError,
-#             self.wiki_client.exceptions.DisambiguationError,
-#         ):
-#             pass
-#     if not summaries:
-#         return "No good Wikipedia Search Result was found"
-#     return "\n\n".join(summaries)
-
 tools = load_tools(["wikipedia"], llm=chat_llm)
-#tools = tools + [search_wikipedia]
 
 agent = initialize_agent(
     tools, 
     chat_llm, 
     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
     handle_parsing_errors=True,
-    verbose = False)
+    verbose = True)
 
+
+def format_docs(docs: List[Document]):
+    return "\n\n".join(str(doc) for doc in docs)
 
 @wiki_bp.route('/wikipedia', methods = ["POST"])
 def get_wiki_response():
@@ -54,8 +47,93 @@ def get_wiki_response():
         data = request.get_json()
         user_input = data.get('strInput')
 
-        response = agent(user_input)
-        return response
+        docs = WikipediaLoader(query=user_input, load_max_docs=2).load()
 
+        # docs = WikipediaRetriever(top_k_results=5).ainvoke(query=user_input)
+        # print(len(docs))
+        # print()
+        # print(docs[0].metadata)
+        # print()
+        # print(docs[1])
+        # print()
+        # print(docs[1].metadata)
+        # print()
+        # print(docs[1].metadata.get('source'))
+
+        formatted_docs = format_docs(docs)
+
+        template_string = """
+            You are a helpful assistant that when given a question, you will answer with the context provided in the Wikipedia article snippets. Each response should be concise \
+            and there is no need to make up answers. If the article snippets do not answer the user's question, just say that you do not know. There may be information that is \
+            not needed or is irrelevant to the user's question, simply include only relevant information. At the end of your answer, please provide the link to the wikipedia \
+            page where your answer refers to. the wikipedia link is in the snippet with the tag 'source'.
+
+            This is the User's question:
+            {user_input}
+
+            These are the Wikipedia article snippets where you will base your answer off of:
+            {context}
+            """
+        
+        prompt_template = ChatPromptTemplate.from_template(template_string)
+        messages = prompt_template.format_messages(user_input=user_input, context=formatted_docs)
+        response = chat_llm(messages)
+
+        return response.content
     except Exception:
-        return "error has occured"
+        return 'error'
+    
+
+def get_wiki_response_with_chain():
+    try:
+        data = request.get_json()
+        user_input = data.get('strInput')
+
+        template_string = """
+            You are a helpful assistant that when given a question, you will answer with the context provided in the Wikipedia article snippets. Each response should be concise \
+            and there is no need to make up answers. If the article snippets do not answer the user's question, just say that you do not know. At the end of your answer, please \
+            provide the link to the wikipedia page where your answer refers to. the wikipedia link is in the snippet with the tag 'source'.
+
+            This is the User's question:
+            {user_input}
+
+            These are the Wikipedia article snippets where you will base your answer off of:
+            {context}
+            """
+        
+        wiki_retriever = WikipediaRetriever(top_k_results=5, doc_content_chars_max=1000)
+
+        prompt_template = ChatPromptTemplate.from_template(template_string)
+
+        rag_chain_from_docs = (
+            RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
+            | prompt_template
+            | chat_llm
+            | StrOutputParser()
+        )
+
+        retrieve_docs = (lambda x: x["user_input"]) | wiki_retriever
+
+        print(retrieve_docs)
+
+        chain = RunnablePassthrough.assign(context=retrieve_docs).assign(
+            answer=rag_chain_from_docs
+        )
+
+        result = chain.invoke(user_input)
+
+        return 'ok'
+    except Exception:
+        return 'error'
+
+# def get_wiki_response():
+#     try:
+#         data = request.get_json()
+#         user_input = data.get('strInput')
+
+#         response = agent(user_input)
+#         print(response)
+#         return response
+
+#     except Exception:
+#         return "error has occured"
