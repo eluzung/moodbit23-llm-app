@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Wikipedia() {
@@ -7,6 +7,8 @@ function Wikipedia() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [messageList, setMessageList] = useState([]);
+  const [state, updateState] = useState();
+  const forceUpdate = useCallback(() => updateState({}), []);
 
   const handleBackButton = () => {
     navigate("/");
@@ -18,7 +20,7 @@ function Wikipedia() {
     if (!input) return;
 
     let msgArr = messageList;
-    msgArr.push({ author: "User", message: input });
+    msgArr.push({ role: "User", content: input });
     setMessageList(msgArr);
 
     try {
@@ -31,7 +33,7 @@ function Wikipedia() {
         inputObj
       );
 
-      msgArr.push({ author: "Chatbot", message: response.data.output });
+      msgArr.push({ role: "Chatbot", content: response.data});
       setMessageList(msgArr);
       setLoading(false);
       setInput("");
@@ -48,6 +50,12 @@ function Wikipedia() {
   function handleSubmit(event) {
     event.preventDefault();
     fetchResponse();
+  }
+
+  function handleMessageList() {
+    if (loading === false) {
+      forceUpdate();
+    }
   }
 
   return (
@@ -67,7 +75,7 @@ function Wikipedia() {
           Enter
         </button>
       </form>
-      <div>
+      <div onChange={handleMessageList}>
         {loading ? (
           <p></p>
         ) : (
@@ -75,13 +83,13 @@ function Wikipedia() {
             {messageList.map((message, index) => (
               <p
                 key={index}
-                className={message.author === "User" ? message.message : ""}
+                className={message.role === "User" ? message.content : ""}
               >
                 <span>
-                  <b>{message.author}</b>
+                  <b>{message.role}</b>
                 </span>
                 <span>: </span>
-                <span>{message.message}</span>
+                <span>{message.content}</span>
               </p>
             ))}
           </div>
