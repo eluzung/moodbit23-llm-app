@@ -5,9 +5,10 @@ from langchain.agents import tool, load_tools, initialize_agent, AgentType
 from langchain_community.chat_models import ChatOpenAI
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.retrievers import WikipediaRetriever
+from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 
 from typing import List
 
@@ -49,37 +50,40 @@ def get_wiki_response():
 
         docs = WikipediaLoader(query=user_input, load_max_docs=2).load()
 
-        # docs = WikipediaRetriever(top_k_results=5).ainvoke(query=user_input)
-        # print(len(docs))
-        # print()
-        # print(docs[0].metadata)
-        # print()
-        # print(docs[1])
-        # print()
-        # print(docs[1].metadata)
-        # print()
-        # print(docs[1].metadata.get('source'))
-
         formatted_docs = format_docs(docs)
+
+        response_schemas = [
+            ResponseSchema(name="response", description="Response to the user's question"),
+            ResponseSchema(name="link", description="Link of wikipedia page where the response is based off of.")
+        ]
+
+        output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+
+        format_instructions = output_parser.get_format_instructions()
 
         template_string = """
             You are a helpful assistant that when given a question, you will answer with the context provided in the Wikipedia article snippets. Each response should be concise \
             and there is no need to make up answers. If the article snippets do not answer the user's question, just say that you do not know. There may be information that is \
-            not needed or is irrelevant to the user's question, simply include only relevant information. At the end of your answer, please provide the link to the wikipedia \
-            page where your answer refers to. the wikipedia link is in the snippet with the tag 'source'.
+            not needed or is irrelevant to the user's question, simply include only relevant information. 
 
             This is the User's question:
             {user_input}
 
             These are the Wikipedia article snippets where you will base your answer off of:
             {context}
+
+            format with the following instructions: {format_instructions}
             """
         
-        prompt_template = ChatPromptTemplate.from_template(template_string)
-        messages = prompt_template.format_messages(user_input=user_input, context=formatted_docs)
-        response = chat_llm(messages)
+        prompt_template = PromptTemplate(template=template_string, input_variables=["user_input", "context"], partial_variables={"format_instructions": format_instructions})
 
-        return response.content
+        chain = prompt_template | chat_llm | output_parser
+
+        response = chain.invoke({"user_input": user_input, "context": formatted_docs})
+        # messages = prompt_template.format_messages(user_input=user_input, context=formatted_docs,)
+        # response = chat_llm(messages)
+
+        return response
     except Exception:
         return 'error'
     
@@ -137,3 +141,14 @@ def get_wiki_response_with_chain():
 
 #     except Exception:
 #         return "error has occured"
+
+        # docs = WikipediaRetriever(top_k_results=5).ainvoke(query=user_input)
+        # print(len(docs))
+        # print()
+        # print(docs[0].metadata)
+        # print()
+        # print(docs[1])
+        # print()
+        # print(docs[1].metadata)
+        # print()
+        # print(docs[1].metadata.get('source'))
