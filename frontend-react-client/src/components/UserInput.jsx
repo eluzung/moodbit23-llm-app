@@ -29,7 +29,7 @@ function UserInput() {
       };
 
       const response = await axios.post(
-        `https://7249-108-46-33-124.ngrok-free.app/api/response`,
+        `https://a7e6-108-46-33-124.ngrok-free.app/api/response`,
         inputObj
       );
 

@@ -29,11 +29,18 @@ function Wikipedia() {
       };
 
       const response = await axios.post(
-        `https://7249-108-46-33-124.ngrok-free.app/api/wikipedia`,
+        `https://a7e6-108-46-33-124.ngrok-free.app/api/wikipedia`,
         inputObj
       );
 
-      msgArr.push({ role: "Chatbot", content: response.data});
+      console.log("This is the response: ", response.data.response);
+      console.log("This is the response: ", response.data.link);
+
+      msgArr.push({
+        role: "Chatbot",
+        content: response.data.response,
+        link: response.data.link,
+      });
       setMessageList(msgArr);
       setLoading(false);
       setInput("");
@@ -90,6 +97,11 @@ function Wikipedia() {
                 </span>
                 <span>: </span>
                 <span>{message.content}</span>
+                <p>
+                  <span>
+                    Here is the link: <a href={message.link}>{message.link}</a>
+                  </span>
+                </p>
               </p>
             ))}
           </div>
