@@ -1,8 +1,9 @@
-from flask import Blueprint, Response, request, jsonify
+from flask import Blueprint, request
 import os
 from dotenv import load_dotenv, find_dotenv
-from langchain.agents import tool, load_tools, initialize_agent, AgentType
-from langchain_community.chat_models import ChatOpenAI
+from langchain_community.agent_toolkits.load_tools import load_tools
+# from langchain.agents import AgentType, initialize_agent, create_react_agent
+from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import ConversationChain
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
@@ -31,12 +32,12 @@ convo_with_summary = ConversationChain(llm=chat_llm,memory=memory)
 
 tools = load_tools(["wikipedia"], llm=chat_llm)
 
-agent = initialize_agent(
-    tools, 
-    chat_llm, 
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-    handle_parsing_errors=True,
-    verbose = True)
+# agent = create_react_agent(
+#     tools, 
+#     chat_llm, 
+#     agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+#     handle_parsing_errors=True,
+#     verbose = True)
 
 
 def format_docs(docs: List[Document]):
