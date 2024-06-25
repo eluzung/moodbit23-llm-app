@@ -29,7 +29,7 @@ function Wikipedia() {
       };
 
       const response = await axios.post(
-        `https://a7e6-108-46-33-124.ngrok-free.app/api/wikipedia`,
+        `https://7451-108-46-33-124.ngrok-free.app/api/wikipedia`,
         inputObj
       );
 
@@ -88,7 +88,7 @@ function Wikipedia() {
         ) : (
           <div>
             {messageList.map((message, index) => (
-              <p
+              <div
                 key={index}
                 className={message.role === "User" ? message.content : ""}
               >
@@ -102,7 +102,7 @@ function Wikipedia() {
                     Here is the link: <a href={message.link}>{message.link}</a>
                   </span>
                 </p>
-              </p>
+              </div>
             ))}
           </div>
         )}

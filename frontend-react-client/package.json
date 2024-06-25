@@ -2,7 +2,7 @@
   "name": "frontend-react-client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://a7e6-108-46-33-124.ngrok-free.app",
+  "proxy": "https://7451-108-46-33-124.ngrok-free.app",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
