@@ -14,6 +14,10 @@ function UserInput() {
     navigate("/wikipedia");
   };
 
+  const handleWebSearchPage = () => {
+    navigate("/web_search")
+  }
+
   const fetchResponse = async () => {
     setLoading(true);
 
@@ -29,7 +33,7 @@ function UserInput() {
       };
 
       const response = await axios.post(
-        `https://a7e6-108-46-33-124.ngrok-free.app/api/response`,
+        `https://7451-108-46-33-124.ngrok-free.app/api/response`,
         inputObj
       );
 
@@ -63,6 +67,9 @@ function UserInput() {
       <h1>Welcome to chatting with ChatBot!</h1>
       <button id="wiki-button" onClick={handleWikiPage}>
         Search the Wiki through chat!
+      </button>
+      <button id="web-search-button" onClick={handleWebSearchPage}>
+        Search the Web!
       </button>
       <form onSubmit={handleSubmit}>
         <input

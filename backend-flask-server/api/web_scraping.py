@@ -1,10 +1,14 @@
 from flask import Blueprint, request
 import os
+import json
 from dotenv import load_dotenv, find_dotenv
+from langchain.prompts import PromptTemplate
 from langchain_community.document_loaders import AsyncChromiumLoader
 from langchain_community.document_transformers import BeautifulSoupTransformer
 from langchain.chains import create_extraction_chain, RetrievalQAWithSourcesChain
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain.output_parsers import ResponseSchema, StructuredOutputParser
+from typing import List
 # import pprint
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -45,14 +49,45 @@ def test2():
     try:
         data = request.get_json()
         user_input = data.get('strInput')
-        
+
         qa_chain = RetrievalQAWithSourcesChain.from_chain_type(
-            chat_llm, retriever=web_research_retriever,
-        )
+        chat_llm, retriever=web_research_retriever)
+
         result = qa_chain.invoke({"question": user_input})
+
+        if (result.get('sources') == ''):
+            direct_search_results = web_research_retriever.invoke(user_input)
+            
+            response_schemas = [
+            ResponseSchema(name="summary_list", 
+                            description="List of summary Dictionaries with the following format: [{'summary': str, 'title': str, 'source': str}]")]
+
+            output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+
+            format_instructions = output_parser.get_format_instructions()
+
+            summary_string = """
+            You are a helpful assistant that can create concise summaries. The following is a list of Documents and you \
+            need to create short and concise summaries for each document:
+            {direct_search_results}
+            You can only base your answer with the provided \
+            text under the tag 'page_content' and ignore the tag 'metadata' and its contents. If a Document has the exact \
+            same 'source' as another Document, combine the summaries together and make sure the combination is seamless. \
+            
+            Format with the following instructions: {format_instructions}
+            """
+
+            summary_template = PromptTemplate(template=summary_string, input_variables=["direct_search_results"], partial_variables={"format_instructions": format_instructions})
+
+            chain = summary_template | chat_llm | output_parser
+
+            direct_result = chain.invoke({"direct_search_results": direct_search_results})
+
+            return direct_result
         return result
-    except Exception:
-        return 'Error occured'
+    except Exception as e:
+        json_object = {"error": str(e)}
+        return(json_object)
 
 
 @web_scraping_bp.route('/web_scraping', methods = ["POST"])
