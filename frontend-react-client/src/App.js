@@ -3,6 +3,7 @@ import "./App.css";
 import UserInput from "./components/UserInput";
 import Wikipedia from "./components/Wikipedia";
 import WebSearch from "./components/WebSearch";
+import JSONValidator from "./components/JSONValidator";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route path="/" element={<UserInput />} />
           <Route path="/wikipedia" element={<Wikipedia />} />
           <Route path="web_search" element={<WebSearch />} />
+          <Route path="/json_validator" element={<JSONValidator />} />
         </Routes>
       </div>
     </BrowserRouter>
