@@ -29,7 +29,7 @@ function WebSearch() {
       };
 
       const response = await axios.post(
-        `https://7451-108-46-33-124.ngrok-free.app/api/web_scraping_search`,
+        `https://794c-108-46-33-124.ngrok-free.app/api/web_scraping_search`,
         inputObj
       );
 
@@ -106,7 +106,9 @@ function WebSearch() {
                       <ul key={i}>
                         <li>{item.title}</li>
                         <li>{item.summary}</li>
-                        <li><a href={item.source}>{item.source}</a></li>
+                        <li>
+                          <a href={item.source}>{item.source}</a>
+                        </li>
                       </ul>
                     ))}
                   </div>

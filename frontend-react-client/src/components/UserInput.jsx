@@ -15,8 +15,12 @@ function UserInput() {
   };
 
   const handleWebSearchPage = () => {
-    navigate("/web_search")
-  }
+    navigate("/web_search");
+  };
+
+  const handleJSONValidatorPage = () => {
+    navigate("/json_validator");
+  };
 
   const fetchResponse = async () => {
     setLoading(true);
@@ -33,7 +37,7 @@ function UserInput() {
       };
 
       const response = await axios.post(
-        `https://7451-108-46-33-124.ngrok-free.app/api/response`,
+        `https://794c-108-46-33-124.ngrok-free.app/api/response`,
         inputObj
       );
 
@@ -70,6 +74,9 @@ function UserInput() {
       </button>
       <button id="web-search-button" onClick={handleWebSearchPage}>
         Search the Web!
+      </button>
+      <button id="json-validator-button" onClick={handleJSONValidatorPage}>
+        JSON
       </button>
       <form onSubmit={handleSubmit}>
         <input

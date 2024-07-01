@@ -29,7 +29,7 @@ function Wikipedia() {
       };
 
       const response = await axios.post(
-        `https://7451-108-46-33-124.ngrok-free.app/api/wikipedia`,
+        `https://794c-108-46-33-124.ngrok-free.app/api/wikipedia`,
         inputObj
       );
 
