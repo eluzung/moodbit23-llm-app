@@ -4,6 +4,7 @@ import UserInput from "./components/UserInput";
 import Wikipedia from "./components/Wikipedia";
 import WebSearch from "./components/WebSearch";
 import JSONValidator from "./components/JSONValidator";
+import WikipediaIndexing from "./components/WikiSearchIndexing";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/wikipedia" element={<Wikipedia />} />
           <Route path="web_search" element={<WebSearch />} />
           <Route path="/json_validator" element={<JSONValidator />} />
+          <Route path="/wiki_search_indexing" element={<WikipediaIndexing />} />
         </Routes>
       </div>
     </BrowserRouter>

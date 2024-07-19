@@ -22,6 +22,10 @@ function UserInput() {
     navigate("/json_validator");
   };
 
+  const handleWikiSearchIndexingPage = () => {
+    navigate("/wiki_search_indexing");
+  };
+
   const fetchResponse = async () => {
     setLoading(true);
 
@@ -37,7 +41,7 @@ function UserInput() {
       };
 
       const response = await axios.post(
-        `https://794c-108-46-33-124.ngrok-free.app/api/response`,
+        `${process.env.REACT_APP_API_URL}/api/response`,
         inputObj
       );
 
@@ -78,12 +82,19 @@ function UserInput() {
       <button id="json-validator-button" onClick={handleJSONValidatorPage}>
         JSON
       </button>
+      <button
+        id="wiki-search-indexing-button"
+        onClick={handleWikiSearchIndexingPage}
+      >
+        Wikipedia Search with Indexing
+      </button>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           value={input}
           onChange={handleChange}
           placeholder="Enter a question"
+          size={50}
         />
         <button type="submit" id="submit">
           Enter

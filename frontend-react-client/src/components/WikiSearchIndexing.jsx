@@ -2,9 +2,10 @@ import axios from "axios";
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Wikipedia() {
+function WikiSearchIndexing() {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
   const [loading, setLoading] = useState(true);
   const [messageList, setMessageList] = useState([]);
   const [state, updateState] = useState();
@@ -19,9 +20,9 @@ function Wikipedia() {
 
     if (!input) return;
 
-    let msgArr = messageList;
-    msgArr.push({ role: "User", content: input });
-    setMessageList(msgArr);
+    // let msgArr = messageList;
+    // msgArr.push({ role: "User", content: input });
+    // setMessageList(msgArr);
 
     try {
       let inputObj = {
@@ -29,19 +30,26 @@ function Wikipedia() {
       };
 
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/wikipedia`,
+        `${process.env.REACT_APP_API_URL}/api/load_docs`,
         inputObj
       );
 
-      console.log("This is the response: ", response.data.response);
-      console.log("This is the response: ", response.data.link);
+      console.log("This is the response: ", response.data);
+      if ((response.data = "success")) {
+        const res = await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/response_with_indexing`,
+          inputObj
+        );
+        console.log("This is the response: ", res.data);
+        // setResult(res);
+      }
 
-      msgArr.push({
-        role: "Chatbot",
-        content: response.data.response,
-        link: response.data.link,
-      });
-      setMessageList(msgArr);
+      //   msgArr.push({
+      //     role: "Chatbot",
+      //     content: response.data.response,
+      //     link: response.data.link,
+      //   });
+      //   setMessageList(msgArr);
       setLoading(false);
       setInput("");
     } catch (error) {
@@ -67,10 +75,8 @@ function Wikipedia() {
 
   return (
     <div>
-      <h1>Search through Wikipedia!</h1>
-      <button id="back-button" onClick={handleBackButton}>
-        Back
-      </button>
+      <h1>Wikipedia Search Indexing</h1>
+      <button onClick={handleBackButton}>Back</button>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -83,33 +89,8 @@ function Wikipedia() {
           Enter
         </button>
       </form>
-      <div onChange={handleMessageList}>
-        {loading ? (
-          <p></p>
-        ) : (
-          <div>
-            {messageList.map((message, index) => (
-              <div
-                key={index}
-                className={message.role === "User" ? message.content : ""}
-              >
-                <span>
-                  <b>{message.role}</b>
-                </span>
-                <span>: </span>
-                <span>{message.content}</span>
-                <p>
-                  <span>
-                    Here is the link: <a href={message.link}>{message.link}</a>
-                  </span>
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
 
-export default Wikipedia;
+export default WikiSearchIndexing;

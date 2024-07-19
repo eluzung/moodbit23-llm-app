@@ -59,36 +59,53 @@ def load_docs():
 
         print(index(docs, record_manager, vectorstore, cleanup=None, source_id_key="source"))
 
-        return "ok"
+        print("Documents loaded!")
+
+        return "success"
     except Exception as e:
-        return str(e)
+        print("error: " + str(e))
+        return "error"
     
 #This route will manage the user's follow up questions that will retrieve answers from the documents
 @indexing_bp.route('/response_with_indexing', methods = ["POST"])
 def get_response():
     try:
         data = request.get_json()
+        print("getting user input")
         user_input = data.get('strInput')
 
+        print("searching for relevant docs")
         related_docs = vectorstore.similarity_search(user_input)
+        print(related_docs[0].page_content)
 
+        print("this is before the template string")
         template_string = """
         You are a very helpful assistant. You will base your answer with the given context. Do not make up any answer or \
         context. If not enough context can answer the user's question, just say that you do not know.
 
         Here is the context: {context}
-        Here i is the user's question: {user_input}
+        Here is the user's question: {user_input}
         """
 
-        prompt_template = PromptTemplate.from_template(template=template_string, input_variables=["context", "user_input"])
+        print("this is after the template string and before the prompt template")
+
+        prompt_template = PromptTemplate.from_template(template=template_string, input_variables=["user_input"])
+        prompt_template.format(user_input=user_input)
+
+        print("this is after the prompt template and before the chain")
 
         chain = prompt_template | chat_llm | output_parser
 
-        response = chain.invoke({"context": related_docs, "user_input": user_input})
+        print("this is after the chain")
+
+        print("retrieving response")
+        response = chain.invoke({"user_input": user_input})
+
+        print("response retrieved")
 
         print(response)
 
-        return "response OK"
+        return user_input
     except Exception as e:
         return str(e)
     
@@ -96,7 +113,7 @@ def get_response():
 def clear_index():
     try:
         _clear()
-        return "OK"
+        return "index cleared"
     except Exception as e:
         return str(e)
 

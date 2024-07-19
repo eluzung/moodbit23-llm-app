@@ -29,7 +29,7 @@ function WebSearch() {
       };
 
       const response = await axios.post(
-        `https://794c-108-46-33-124.ngrok-free.app/api/web_scraping_search`,
+        `${process.env.REACT_APP_API_URL}/api/web_scraping_search`,
         inputObj
       );
 
@@ -80,6 +80,7 @@ function WebSearch() {
           value={input}
           onChange={handleChange}
           placeholder="Ask me anything"
+          size={50}
         />
         <button type="submit" id="submit">
           Enter
