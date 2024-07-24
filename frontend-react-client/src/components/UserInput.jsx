@@ -22,8 +22,8 @@ function UserInput() {
     navigate("/json_validator");
   };
 
-  const handleWikiSearchIndexingPage = () => {
-    navigate("/wiki_search_indexing");
+  const handleIndexingPage = () => {
+    navigate("/indexing");
   };
 
   const fetchResponse = async () => {
@@ -84,9 +84,9 @@ function UserInput() {
       </button>
       <button
         id="wiki-search-indexing-button"
-        onClick={handleWikiSearchIndexingPage}
+        onClick={handleIndexingPage}
       >
-        Wikipedia Search with Indexing
+        Indexing
       </button>
       <form onSubmit={handleSubmit}>
         <input
