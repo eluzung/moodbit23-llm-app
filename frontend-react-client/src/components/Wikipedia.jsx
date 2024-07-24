@@ -29,7 +29,7 @@ function Wikipedia() {
       };
 
       const response = await axios.post(
-        `https://7451-108-46-33-124.ngrok-free.app/api/wikipedia`,
+        `${process.env.REACT_APP_API_URL}/api/wikipedia`,
         inputObj
       );
 
@@ -77,6 +77,7 @@ function Wikipedia() {
           value={input}
           onChange={handleChange}
           placeholder="Enter a question"
+          size={50}
         />
         <button type="submit" id="submit">
           Enter

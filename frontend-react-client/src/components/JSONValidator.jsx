@@ -25,7 +25,7 @@ function JSONValidator() {
       };
 
       const response = await axios.post(
-        `https://794c-108-46-33-124.ngrok-free.app/api/json`,
+        `${process.env.REACT_APP_API_URL}/api/json`,
         inputObj
       );
 
@@ -53,7 +53,7 @@ function JSONValidator() {
       };
 
       const response = await axios.post(
-        `https://794c-108-46-33-124.ngrok-free.app/api/fix_json`,
+        `${process.env.REACT_APP_API_URL}/api/fix_json`,
         inputObj
       );
 

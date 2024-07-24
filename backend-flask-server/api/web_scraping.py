@@ -41,6 +41,8 @@ web_research_retriever = WebResearchRetriever.from_llm(
     vectorstore=vectorstore, llm=chat_llm, search=search
 )
 
+
+
 logging.basicConfig()
 logging.getLogger("langchain_community.retrievers.web_research").setLevel(logging.INFO)
 
@@ -99,6 +101,10 @@ def test():
         return 'OK'
     except Exception:
         return 'An error has occured'
+    
+@web_scraping_bp.route('/get_id', methods = ["POST"])
+def get_id():
+    return vectorstore.get()
     
 def scrape_with_playwright(urls):
     #load and transform
